@@ -1,18 +1,20 @@
+;Battle of the Eras disassembly done by ItsT3K using Semblance on GNU/Linux.
+;This was slightly easier to disassemble unlike what bisqwit did with Dyna
+;Blaster as BERAS is not a compressed EXE file. Meaning it was a lot easier
+;for Semblance to find code. This disassembly is a bit rough and not 100%
+;accurate as I am a beginner with Assembly code and am going by x86 Assembly
+;References and Pentium Register References, So please. Use this as
+;Educational Reference. But the disassembly was done by permission from the
+;original programmer and they deserve every little bit of credit for
+;creating the game in the first place. 
 
-;Minimum extra allocation: 1648 bytes
-;Maximum extra allocation: 1048560 bytes
-;Initial stack location: 0x50400
-;Program entry point: 0
-;Overlay number: 0
-
-;Code (start = 0x3e00, length = 0x53c48):
-
-;Battle of the eras improved disassembly. Using Semblance for GNU/Linux
+;The original game was written in 90% Borland C++ and 10% TASM on OS/2 Warp.
+;I am following DOS API References and other technical references.
 ;======SUBROUTINE 00000======
 	mov	dx, 45C6h
 	mov	[cs:026Dh], dx
 	mov	ah, 30h
-	int	21h			;DOS Interrupt 21h
+	int	21h			;DOS Interrupt 21h aka Random Read
 	mov	bp, [0002h]
 	mov	bx, [002Ch]
 	mov	ds, dx
@@ -74,7 +76,7 @@
 	call	0fda			
 	>mov	bx, di			;Move base register to destination
 					;index register
-	add	bx, dx			;Move base register to Data register
+	add	bx, dx			;Add bx to dx register
 	mov	[0080h], bx
 	mov	[0084h], bx
 	mov	ax, [0074h]
@@ -142,20 +144,20 @@
 	>xor	bp, bp			;Logical OR on Stack Base Point
 					;Register
 	push	bp			;Push Stack Base Point Register
-	nop
-	push	cs			;Push Code segment Register
-	call	3061
-	pop	ax			;Pop value from Accumulator Register
+		nop
+		push	cs			;Push Code segment Register
+		call	3061
+		pop	ax			;Pop value from Accumulator Register
 	mov	es, [cs:026Dh]
 	mov	si, 78A2h
 	mov	di, 78E4h
 	call	01e8
 	;Word Pushing 
-	push	word [006Ch]
-	push	word [006Ah]
-	push	word [0068h]
-	push	word [0066h]
-	push	word [0064h]
+		push	word [006Ch]
+		push	word [006Ah]
+		push	word [0068h]
+		push	word [0066h]
+		push	word [0064h]
 	;Back to regular code
 	call
 	push	ax			;Push Accumulator Register on to
@@ -165,47 +167,51 @@
 					;stack
 	call	1170
 ;======SUBROUTINE 00146======
-00146 <no name>:
-00146:	2e 8e 06 6d 02            mov	es, [cs:026Dh]
-0014b:	56                        push	si
-0014c:	57                        push	di
-0014d:	be e4 78                  mov	si, 78E4h
-00150:	bf fc 78                  mov	di, 78FCh
-00153:	e8 d6 00                  call	022c
-00156:	5f                        pop	di
-00157:	5e                        pop	si
-00158:	cb                        retf
 
-00159 <no name>:
-00159:	cb                        retf
+	mov	es, [cs:026Dh]
+stackfunction:	
+		push	si			;Push Source Index register onto
+						;stack
+		push	di			;Push Destination Index Register
+						;onto stack
+		mov	si, 78E4h		;Move Source Index Register to 78E4h
+		mov	di, 78FCh		;Move Destination Index register to
+						;78FC
+		call	022c			;Call 022c
+		pop	di			;Pop Destination Index Register off
+						;of the stack
+		pop	si
+		retf				;Return from Function				
+;======SUBROUTINE 00159======
+	 retf
+;======SUBROUTINE 015a======
 
-0015a <no name>:
-0015a:	8b ec                     mov	bp, sp
-0015c:	b4 4c                     mov	ah, 4Ch
-0015e:	8a 46 04                  mov	al, [bp+04h]
-00161:	cd 21                     int	21h
-00163:	ba 45 00                  mov	dx, 0045h
-00166:	1e                        push	ds
-00167:	52                        push	dx
-00168:	90                        nop
-00169:	0e                        push	cs
-0016a:	e8 7b 0f                  call	10e8
-0016d:	5a                        pop	dx
-0016e:	1f                        pop	ds
-0016f:	b8 03 00                  mov	ax, 0003h
-00172:	50                        push	ax
-00173:	90                        nop
-00174:	0e                        push	cs
-00175:	e8 0b 10                  call	1183
+	mov	bp, sp				
+	mov	ah, 4Ch				;move ah register to Exit
+						;with Call code function
+	mov	al, [bp+04h]			;Move al register to bp+04h
+	int	21h				;Init DOS Interrupt 21h
+	mov	dx, 0045h			;Move dx register to 0045h                        
+	push	ds
+	push	dx
+	push	cs	
+	call	10e8
+	pop	dx
+	pop	ds
+	mov	ax, 0003h
+	push	ax
+	nop
+	push	cs
+	call	1183
+;======SUBROUTINE 00178======
 
-00178 <no name>:
-00178:	1e                        push	ds
-00179:	b8 00 35                  mov	ax, 3500h
-0017c:	cd 21                     int	21h
-0017e:	89 1e 54 00               mov	[0054h], bx
-00182:	8c 06 56 00               mov	[0056h], es
-00186:	b8 04 35                  mov	ax, 3504h
-00189:	cd 21                     int	21h
+	push	ds
+	mov	ax, 3500h
+	int	21h
+	mov	[0054h], bx
+	mov	[0056h], es
+	mov	ax, 3504h
+	int	21h
 0018b:	89 1e 58 00               mov	[0058h], bx
 0018f:	8c 06 5a 00               mov	[005Ah], es
 00193:	b8 05 35                  mov	ax, 3505h
@@ -279,9 +285,9 @@
 0022b:	c3                       >ret
 
 0022c <no name>:
-0022c:	b4 00                    >mov	ah, 00h
-0022e:	8b d7                     mov	dx, di
-00230:	8b de                     mov	bx, si
+0022c:	b4 00                    >mov	ah, 00h		
+0022e:	8b d7                    	 mov	dx, di
+00230:	8b de                    	 mov	bx, si
 00232:	3b df                    >cmp	bx, di
 00234:	74 17                     jz	024d
 00236:	26 80 3f ff               cmp	byte [es:bx], FFh
