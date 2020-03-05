@@ -22,7 +22,7 @@
 	mov	[0074h], es
 	mov	[0070h], bx
 	mov	[0088h], bp
-	call	0178			;Jump to 0178
+	call	SubRoutine0178		;Call Subroutine 0178
 	mov	ax, [0070h]
 	mov	es, ax			;Move register from high memory
 					;register to a general register
@@ -62,6 +62,7 @@
 	mov	di, 0200h		;Move di register to Get Real Mode
 					;Interrupt Vector
 	mov	[es:1430h], di		
+
 	>mov	cl, 04h			;Move call counter register to Get
 					;Access to Real Mode Stacks
 	shr	di, cl			;Shift right
@@ -140,20 +141,20 @@
 	>nop
 	push	cs			;Push Code Segment Register onto
 					;stack
-	call	0fda
+	call	SubRoutine0fda
 	>xor	bp, bp			;Logical OR on Stack Base Point
 					;Register
 	push	bp			;Push Stack Base Point Register
 		nop
 		push	cs			;Push Code segment Register
-		call	3061
+		call	SubRoutine3061		;call Subroutine 3061
 		pop	ax			;Pop value from Accumulator Register
 	mov	es, [cs:026Dh]
 	mov	si, 78A2h
 	mov	di, 78E4h
 	call	01e8
 	;Word Pushing 
-		push	word [006Ch]
+		push	word [006Ch]		
 		push	word [006Ah]
 		push	word [0068h]
 		push	word [0066h]
@@ -177,13 +178,13 @@ stackfunction:
 		mov	si, 78E4h		;Move Source Index Register to 78E4h
 		mov	di, 78FCh		;Move Destination Index register to
 						;78FC
-		call	022c			;Call 022c
+		call	SubRoutine022c		;Call 022c
 		pop	di			;Pop Destination Index Register off
 						;of the stack
 		pop	si
 		retf				;Return from Function				
 ;======SUBROUTINE 00159======
-	 retf
+	 retf					;Return from Function
 ;======SUBROUTINE 015a======
 
 	mov	bp, sp				
@@ -192,63 +193,75 @@ stackfunction:
 	mov	al, [bp+04h]			;Move al register to bp+04h
 	int	21h				;Init DOS Interrupt 21h
 	mov	dx, 0045h			;Move dx register to 0045h                        
-	push	ds
-	push	dx
-	push	cs	
-	call	10e8
-	pop	dx
-	pop	ds
-	mov	ax, 0003h
+	push	ds				;Push Data Segment Register
+						;onto stack
+	push	dx				;Move Data Register onto
+						;stack
+	push	cs				;Push the code segment
+						;Register onto stack 	
+	call	SubRoutine10e8			;Call Subroutine 10e8				
+	pop	dx				;Pop dx Register off stack
+	pop	ds				;Pop ds Register off stack
+	mov	ax, 0003h			
 	push	ax
 	nop
 	push	cs
 	call	1183
 ;======SUBROUTINE 00178======
-
+SubRoutine0178:
 	push	ds
 	mov	ax, 3500h
 	int	21h
 	mov	[0054h], bx
 	mov	[0056h], es
 	mov	ax, 3504h
+	int	21h				;DOS Interrupt 21h. BIOS
+						;interrupt
+	mov	[0058h], bx
+	mov	[005Ah], es
+	mov	ax, 3505h
 	int	21h
-0018b:	89 1e 58 00               mov	[0058h], bx
-0018f:	8c 06 5a 00               mov	[005Ah], es
-00193:	b8 05 35                  mov	ax, 3505h
-00196:	cd 21                     int	21h
-00198:	89 1e 5c 00               mov	[005Ch], bx
-0019c:	8c 06 5e 00               mov	[005Eh], es
-001a0:	b8 06 35                  mov	ax, 3506h
-001a3:	cd 21                     int	21h
-001a5:	89 1e 60 00               mov	[0060h], bx
-001a9:	8c 06 62 00               mov	[0062h], es
-001ad:	b8 00 25                  mov	ax, 2500h
-001b0:	8c ca                     mov	dx, cs
-001b2:	8e da                     mov	ds, dx
-001b4:	ba 63 01                  mov	dx, 0163h
-001b7:	cd 21                     int	21h
-001b9:	1f                        pop	ds
-001ba:	c3                        ret
+	mov	[005Ch], bx
+	mov	[005Eh], es
+	mov	ax, 3506h
+	int	21h
 
+movefunctions:	
+		mov	[0060h], bx			;Move 0060h to Base
+							;Register
+		mov	[0062h], es			;Move 0062h to Destination
+							;Index Register
+		mov	ax, 2500h			;Move Accumulator Register
+							;to 2500h
+		mov	dx, cs				;Move Destination Index
+							;Register to Index Pointer Register
+		mov	ds, dx				;Move Data Register to Data
+							;Segment Register
+		mov	dx, 0163h			;Move Data Segment Register
+							;to 0163h
+	int	21h
+	pop	ds				;Pop
+	ret					;Return from Function
+;======SUBROUTINE 001bb======
 001bb <no name>:
-001bb:	1e                        push	ds
-001bc:	b8 00 25                  mov	ax, 2500h
-001bf:	c5 16 54 00               lds	dx, [0054h]
-001c3:	cd 21                     int	21h
-001c5:	1f                        pop	ds
-001c6:	1e                        push	ds
-001c7:	b8 04 25                  mov	ax, 2504h
-001ca:	c5 16 58 00               lds	dx, [0058h]
-001ce:	cd 21                     int	21h
-001d0:	1f                        pop	ds
-001d1:	1e                        push	ds
-001d2:	b8 05 25                  mov	ax, 2505h
-001d5:	c5 16 5c 00               lds	dx, [005Ch]
-001d9:	cd 21                     int	21h
-001db:	1f                        pop	ds
-001dc:	1e                        push	ds
-001dd:	b8 06 25                  mov	ax, 2506h
-001e0:	c5 16 60 00               lds	dx, [0060h]
+	push	ds
+	mov	ax, 2500h
+	lds	dx, [0054h]
+	int	21h
+	pop	ds
+	push	ds
+	mov	ax, 2504h
+	lds	dx, [0058h]
+	int	21h
+	pop	ds
+	push	ds
+	mov	ax, 2505h
+	lds	dx, [005Ch]
+	int	21h
+	pop	ds
+	push	ds
+	mov	ax, 2506h
+	lds	dx, [0060h]
 001e4:	cd 21                     int	21h
 001e6:	1f                        pop	ds
 001e7:	cb                        retf
@@ -284,7 +297,7 @@ stackfunction:
 00229:	eb bd                     jmp	01e8
 0022b:	c3                       >ret
 
-0022c <no name>:
+SubRoutine022c:
 0022c:	b4 00                    >mov	ah, 00h		
 0022e:	8b d7                    	 mov	dx, di
 00230:	8b de                    	 mov	bx, si
@@ -307,14 +320,14 @@ stackfunction:
 0025c:	74 07                     jz	0265
 0025e:	26 ff 5f 02               call	far [es:bx+02h]
 00262:	07                        pop	es
-00263:	eb c7                     jmp	022c
+00263:	eb c7                     jmp	SubRoutine022c
 00265:	26 ff 57 02              >call	word [es:bx+02h]
 00269:	07                        pop	es
-0026a:	eb c0                     jmp	022c
-0026c:	c3                       >ret
+0026a:	eb c0                     jmp	SubRoutine022c
+0026c:	c3                       >ret	;Loop
      ...
-
-00fda <no name>:
+;======SUBROUTINE 00fda======
+SubRoutine0fda:
 00fda:	56                        push	si
 00fdb:	57                        push	di
 00fdc:	1e                        push	ds
@@ -333,8 +346,8 @@ stackfunction:
 00ff3:	5e                        pop	si
 00ff4:	cb                        retf
      ...
-
-010e8 <no name>:
+;======SUBROUTINE 010e8======
+SubRoutine10e8:
 010e8:	55                        push	bp
 010e9:	8b ec                     mov	bp, sp
 010eb:	56                        push	si
@@ -463,7 +476,7 @@ stackfunction:
 014c4:	c2 02 00                  ret	0002h
      ...
 
-03061 <no name>:
+SubRoutine3061:
 03061:	56                        push	si
 03062:	57                        push	di
 03063:	36 c7 06 12 00 00 00      mov	word [ss:0012h], 0000h
